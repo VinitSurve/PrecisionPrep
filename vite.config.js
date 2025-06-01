@@ -44,16 +44,48 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt'],
+      includeAssets: ['PrecisionPrep.png', 'robots.txt', 'manifest.webmanifest'],
       manifest: {
         name: 'PrecisionPrep Timer Tracker',
-        short_name: 'PrecisionPrep Timer',
+        short_name: 'PrecisionPrep',
         theme_color: '#3F51B5',
         background_color: '#F5F5F5',
         display: 'standalone',
+        start_url: '/',
+        scope: '/',
         icons: [
-          { src: '/pwa-icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/pwa-icon-512.png', sizes: '512x512', type: 'image/png' }
+          {
+            src: '/PrecisionPrep.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/PrecisionPrep.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          }
+        ]
+      },
+      workbox: {
+        // Improve caching strategy
+        globPatterns: ['**/*.{js,css,html,png,jpg,jpeg,svg,ico}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 // 24 hours
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
         ]
       }
     })
