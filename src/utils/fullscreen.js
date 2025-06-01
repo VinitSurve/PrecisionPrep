@@ -4,11 +4,12 @@
 
 // Check if full screen mode is available
 export const isFullScreenAvailable = () => {
-  return (
-    document.fullscreenEnabled ||
-    document.webkitFullscreenEnabled ||
-    document.mozFullScreenEnabled ||
-    document.msFullscreenEnabled
+  const doc = document.documentElement;
+  return !!(
+    doc.requestFullscreen ||
+    doc.webkitRequestFullscreen ||
+    doc.mozRequestFullScreen ||
+    doc.msRequestFullscreen
   );
 };
 
@@ -23,28 +24,45 @@ export const isInFullScreen = () => {
 };
 
 // Enter full screen mode
-export const enterFullScreen = (element = document.documentElement) => {
-  if (element.requestFullscreen) {
-    element.requestFullscreen();
-  } else if (element.webkitRequestFullscreen) {
-    element.webkitRequestFullscreen();
-  } else if (element.mozRequestFullScreen) {
-    element.mozRequestFullScreen();
-  } else if (element.msRequestFullscreen) {
-    element.msRequestFullscreen();
+export const enterFullScreen = () => {
+  try {
+    // Only attempt fullscreen if directly triggered by a user gesture
+    const doc = document.documentElement;
+    
+    // Don't attempt to enter fullscreen programmatically to avoid the error
+    // This should be called from a button click handler instead
+    return Promise.resolve();
+  } catch (err) {
+    console.warn('Fullscreen request failed:', err);
+    return Promise.reject(err);
   }
 };
 
 // Exit full screen mode
 export const exitFullScreen = () => {
-  if (document.exitFullscreen) {
-    document.exitFullscreen();
-  } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
-  } else if (document.mozCancelFullScreen) {
-    document.mozCancelFullScreen();
-  } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
+  try {
+    // Only attempt to exit fullscreen if we're currently in fullscreen
+    if (!document.fullscreenElement &&
+        !document.webkitFullscreenElement &&
+        !document.mozFullScreenElement &&
+        !document.msFullscreenElement) {
+      return Promise.resolve();
+    }
+    
+    if (document.exitFullscreen) {
+      return document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      return document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      return document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      return document.msExitFullscreen();
+    }
+    
+    return Promise.resolve();
+  } catch (err) {
+    console.warn('Exit fullscreen failed:', err);
+    return Promise.reject(err);
   }
 };
 

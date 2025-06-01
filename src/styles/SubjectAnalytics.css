@@ -1,0 +1,341 @@
+/* Subject Analytics Styles */
+.subject-analytics-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.subject-analytics-container h2 {
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 1.75rem;
+}
+
+.analytics-description {
+  margin-bottom: 2rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Analytics card with flat design */
+.analytics-card {
+  background-color: var(--color-card-bg);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--box-shadow);
+}
+
+.analytics-card h3 {
+  margin-bottom: 1.5rem;
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Chart layout with chart and outbox side by side */
+.chart-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Chart container - removed neumorphic effects */
+.chart-container {
+  height: 260px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* New data outbox for showing details */
+.data-outbox {
+  background-color: var(--color-background);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.data-outbox h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.data-outbox p {
+  margin-bottom: 0.25rem;
+  color: var(--color-text-primary);
+}
+
+.outbox-prompt {
+  color: var(--color-text-secondary) !important;
+  text-align: center;
+  font-style: italic;
+}
+
+.no-chart-data {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Custom legend styling */
+.chart-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.legend-item:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 8px;
+}
+
+.legend-label {
+  font-size: 12px;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px; /* Adjust based on your layout */
+}
+
+/* Custom tooltip styling */
+.custom-tooltip {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 250px;
+}
+
+.tooltip-name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+  font-size: 16px;
+}
+
+.tooltip-time,
+.tooltip-minutes,
+.tooltip-sessions,
+.tooltip-accuracy,
+.tooltip-speed {
+  margin: 0.25rem 0;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.analytics-explanation {
+  background-color: var(--color-card-bg);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--box-shadow);
+}
+
+.analytics-explanation h3 {
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.analytics-explanation ul {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.analytics-explanation li {
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.analytics-explanation p {
+  font-style: italic;
+}
+
+/* Enhanced Legend Styles */
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.legend-item:hover,
+.legend-item.active {
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border-radius: 2px;
+}
+
+.legend-label {
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* Provide clearer tap/touch feedback for mobile interactions */
+@media (max-width: 768px) {
+  .legend-item {
+    padding: 8px 5px; /* Larger touch target */
+    margin-bottom: 8px;
+    position: relative;
+  }
+  
+  .legend-item.active::after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+  }
+  
+  .outbox-prompt {
+    font-style: italic;
+    padding: 10px;
+    background-color: rgba(var(--color-primary-rgb), 0.05);
+    border-radius: var(--border-radius);
+    text-align: center;
+  }
+}
+
+/* Ensure chart layout has proper click area */
+.chart-layout {
+  min-height: 400px;
+}
+
+.data-outbox {
+  background-color: var(--color-background);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Enhanced data outbox for selected items */
+.data-outbox h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-container {
+    height: 240px;
+  }
+  
+  .data-outbox {
+    min-height: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-card {
+    padding: 1rem;
+  }
+  
+  .chart-container {
+    height: 220px;
+  }
+  
+  .legend-label {
+    max-width: 100px;
+  }
+}
+
+@media (max-width: 576px) {
+  .chart-container {
+    height: 200px;
+  }
+  
+  .analytics-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .legend-label {
+    max-width: 80px;
+    font-size: 10px;
+  }
+  
+  .legend-color {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .data-outbox {
+    padding: 0.75rem;
+    min-height: 70px;
+  }
+  
+  .data-outbox h4 {
+    font-size: 1rem;
+  }
+  
+  .data-outbox p {
+    font-size: 0.9rem;
+  }
+}

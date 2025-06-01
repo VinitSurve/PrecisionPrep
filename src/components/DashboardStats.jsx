@@ -411,15 +411,7 @@ const DashboardStats = () => {
         }
       },
       tooltip: {
-        callbacks: {
-          label: function(context) {
-            const label = context.label || '';
-            const value = context.raw || 0;
-            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-            const percentage = Math.round((value / total) * 100);
-            return `${label}: ${value} (${percentage}%)`;
-          }
-        }
+        enabled: false // Disable tooltips completely
       }
     }
   };
@@ -460,7 +452,11 @@ const DashboardStats = () => {
                   <h3>Correct vs Incorrect</h3>
                   <div className="pie-chart">
                     {pieChartData.correctVsIncorrect && (
-                      <Pie data={pieChartData.correctVsIncorrect} options={pieChartOptions} />
+                      <Pie 
+                        data={pieChartData.correctVsIncorrect} 
+                        options={pieChartOptions} 
+                        isAnimationActive={false} // Add this line
+                      />
                     )}
                   </div>
                 </div>
@@ -469,7 +465,11 @@ const DashboardStats = () => {
                   <h3>Time Performance</h3>
                   <div className="pie-chart">
                     {pieChartData.timePerformance && (
-                      <Pie data={pieChartData.timePerformance} options={pieChartOptions} />
+                      <Pie 
+                        data={pieChartData.timePerformance} 
+                        options={pieChartOptions} 
+                        isAnimationActive={false} // Add this line
+                      />
                     )}
                   </div>
                 </div>
@@ -478,7 +478,11 @@ const DashboardStats = () => {
                   <h3>Speed Distribution</h3>
                   <div className="pie-chart">
                     {pieChartData.speedDistribution && (
-                      <Pie data={pieChartData.speedDistribution} options={pieChartOptions} />
+                      <Pie 
+                        data={pieChartData.speedDistribution} 
+                        options={pieChartOptions} 
+                        isAnimationActive={false} // Add this line
+                      />
                     )}
                   </div>
                 </div>

@@ -8,6 +8,7 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
@@ -23,8 +24,10 @@ const Signup = () => {
       setLoading(true);
       setError(null);
       
+      console.log('Attempting signup with email:', email);
+      
       // Sign up with email and password
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
@@ -33,14 +36,33 @@ const Signup = () => {
         throw error;
       }
       
-      // Redirect to login page with success message
-      navigate('/login', { 
-        state: { 
-          message: 'Registration successful! Please check your email to confirm your account.' 
-        } 
-      });
+      console.log('Signup successful, user data:', data);
+      
+      if (data?.user) {
+        // Store user ID in localStorage
+        localStorage.setItem('auth_user_id', data.user.id);
+        
+        // Display success message
+        setSuccessMessage('Sign-up successful! Redirecting to onboarding...');
+        
+        // Set a flag to make the transition smoother
+        localStorage.setItem('signup_completed', 'true');
+        
+        // Wait a moment for the UI to update before redirecting
+        setTimeout(() => {
+          navigate('/onboarding', { replace: true });
+        }, 800);
+      } else if (data?.session === null) {
+        // For email confirmation setups
+        setSuccessMessage('Registration successful! Please check your email to confirm your account before logging in.');
+        setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 2000);
+      }
     } catch (err) {
+      console.error('Signup error:', err);
       setError(err.message || 'An error occurred during signup');
+    } finally {
       setLoading(false);
     }
   };
@@ -51,6 +73,7 @@ const Signup = () => {
         <h2>Sign Up</h2>
         
         {error && <div className="error-message">{error}</div>}
+        {successMessage && <div className="success-message">{successMessage}</div>}
         
         <form onSubmit={handleSignup}>
           <div className="form-group">
@@ -60,6 +83,7 @@ const Signup = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
               required
             />
           </div>
@@ -71,6 +95,7 @@ const Signup = () => {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
               required
               minLength="6"
             />
@@ -84,6 +109,7 @@ const Signup = () => {
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
               required
             />
           </div>

@@ -1,45 +1,63 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Get Supabase URL and anon key from environment variables
-// Provide fallback values to prevent URL construction errors during development
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder-project.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Create a single supabase client for interacting with your database
-let supabase;
+// Implement true singleton pattern with closure
+const createSupabaseClient = () => {
+  let instance = null;
 
-try {
-  supabase = createClient(supabaseUrl, supabaseAnonKey);
-  console.log('Supabase client initialized successfully');
-} catch (error) {
-  console.error('Error initializing Supabase client:', error);
-  // Create a mock client for development if there's an error
-  // This allows the app to load without crashing, though Supabase features won't work
-  supabase = {
-    auth: {
-      getUser: () => Promise.resolve({ data: { user: null } }),
-      getSession: () => Promise.resolve({ data: { session: null } }),
-      onAuthStateChange: () => ({ subscription: { unsubscribe: () => {} } }),
-      signInWithPassword: () => Promise.resolve({ error: { message: 'Supabase not properly configured' } }),
-      signUp: () => Promise.resolve({ error: { message: 'Supabase not properly configured' } }),
-      signOut: () => Promise.resolve({})
-    },
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          order: () => Promise.resolve({ data: [], error: null })
-        })
-      }),
-      insert: () => Promise.resolve({ error: { message: 'Supabase not properly configured' } })
-    })
+  return () => {
+    if (instance) return instance;
+
+    instance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+        // Use a consistent storage key
+        storageKey: 'precision-prep-auth'
+      }
+    });
+
+    console.log('Supabase client initialized');
+    return instance;
   };
-}
+};
 
-export { supabase };
+// Create a getter function
+const getSupabase = createSupabaseClient();
 
-// Display a warning in the console if using placeholder values
-if (supabaseUrl === 'https://placeholder-project.supabase.co') {
-  console.warn(
-    'You are using placeholder Supabase credentials. Please update your .env file with actual Supabase URL and anon key.'
-  );
-}
+// Export a single Supabase instance
+export const supabase = getSupabase();
+
+// Helper functions for common auth operations
+export const getCurrentUser = async () => {
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return data.user;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+};
+
+export const checkUserPreferences = async userId => {
+  try {
+    if (!userId) return null;
+
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  } catch (error) {
+    console.error('Error checking user preferences:', error);
+    return null;
+  }
+};

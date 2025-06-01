@@ -23,10 +23,8 @@ const Navbar = () => {
       document.body.classList.add('dark-mode');
     }
 
-    // Auto-enter full screen mode if available
-    if (isFullScreenAvailable()) {
-      enterFullScreen();
-    }
+    // Don't auto-enter fullscreen as it requires user gesture
+    // and causes the permission error
 
     // Get current user
     const getCurrentUser = async () => {
@@ -38,15 +36,8 @@ const Navbar = () => {
 
     return () => {
       authListener?.subscription?.unsubscribe();
-      
-      // No cleanup needed for full screen
     };
   }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
-  };
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -69,8 +60,8 @@ const Navbar = () => {
         {user ? (
           <>
             <Link to="/dashboard" className="nav-link">Dashboard</Link>
-            <Link to="/timer" className="nav-link">Timer</Link>
-            <button onClick={handleSignOut} className="nav-button">Sign Out</button>
+            <Link to="/subject-timer" className="nav-link">Subject Timer</Link>
+            <Link to="/settings" className="nav-link">Settings</Link>
           </>
         ) : (
           <>
@@ -78,14 +69,6 @@ const Navbar = () => {
             <Link to="/signup" className="nav-link">Sign Up</Link>
           </>
         )}
-        <button 
-          onClick={toggleDarkMode} 
-          className="theme-toggle"
-          aria-label="Toggle dark mode"
-        >
-          {darkMode ? '☀️' : '🌙'}
-        </button>
-
       </div>
     </nav>
   );
