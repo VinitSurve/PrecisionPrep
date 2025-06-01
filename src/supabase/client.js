@@ -16,8 +16,27 @@ const createSupabaseClient = () => {
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: false,
-        // Use a consistent storage key
-        storageKey: 'precision-prep-auth'
+        storageKey: 'precision-prep-auth',
+        // Add retry and timeout config
+        flowType: 'implicit',
+        debug: true
+      },
+      // Add global error handler
+      global: {
+        fetch: (url, options) => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+          return fetch(url, { ...options, signal: controller.signal })
+            .then(response => {
+              clearTimeout(timeoutId);
+              return response;
+            })
+            .catch(error => {
+              clearTimeout(timeoutId);
+              console.error('Supabase fetch error:', error);
+              throw error;
+            });
+        }
       }
     });
 
@@ -44,20 +63,15 @@ export const getCurrentUser = async () => {
   }
 };
 
-export const checkUserPreferences = async userId => {
+// Add a reconnection function
+export const reconnectSupabase = async () => {
   try {
-    if (!userId) return null;
-
-    const { data, error } = await supabase
-      .from('user_preferences')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
+    // Try to refresh the session
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error) throw error;
+    return data?.session || null;
   } catch (error) {
-    console.error('Error checking user preferences:', error);
+    console.error('Failed to reconnect Supabase:', error);
     return null;
   }
 };
