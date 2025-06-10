@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase/client';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Settings.css';
 
 const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const navigate = useNavigate();
+  const [signingOut, setSigningOut] = useState(false);
   
   // User settings
   const [examList, setExamList] = useState([]);
@@ -418,6 +421,25 @@ const Settings = () => {
     }
   };
 
+  // Handle sign out
+  const handleSignOut = async () => {
+    try {
+      setSigningOut(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear any local storage items if needed
+      localStorage.removeItem('currentSession');
+      
+      // Redirect to login page
+      navigate('/login', { replace: true });
+    } catch (err) {
+      console.error('Error signing out:', err);
+      setError(err.message || 'Failed to sign out.');
+      setSigningOut(false);
+    }
+  };
+
   if (loading) {
     return <div className="settings-loading">Loading settings...</div>;
   }
@@ -554,6 +576,22 @@ const Settings = () => {
             disabled={!customSubject.trim()}
           >
             Add
+          </button>
+        </div>
+      </section>
+
+      {/* New Account section with sign out button */}
+      <section className="settings-section">
+        <h2>Account</h2>
+        <p>Manage your account settings and session.</p>
+        
+        <div className="account-actions">
+          <button 
+            className="signout-button" 
+            onClick={handleSignOut}
+            disabled={signingOut}
+          >
+            {signingOut ? 'Signing Out...' : 'Sign Out'}
           </button>
         </div>
       </section>
