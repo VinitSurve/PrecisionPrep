@@ -9,5 +9,78 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        // Wait until the page is fully loaded
+        window.addEventListener('load', async () => {
+          try {
+            // First unregister any existing service workers
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+              await registration.unregister();
+              console.log('Previous service worker unregistered');
+            }
+            
+            // Don't try to register the service worker in development mode
+            if (import.meta.env.DEV) {
+              console.log('Skipping service worker registration in development mode');
+              return;
+            }
+            
+            // Only register in production mode with the correct URL
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/'
+            });
+            console.log('Service worker registered successfully:', registration.scope);
+          } catch (error) {
+            console.error('Service worker registration failed:', error);
+          }
+        });
+      }
+      
+      // Development helper to keep auth state when changing ports
+      const storeAuthForPortChange = () => {
+        try {
+          // Store current auth data in sessionStorage (temporary for port change)
+          const authItems = {};
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+              authItems[key] = localStorage.getItem(key);
+            }
+          }
+          
+          if (Object.keys(authItems).length > 0) {
+            sessionStorage.setItem('auth_port_transfer', JSON.stringify(authItems));
+            console.log('Auth state saved for port change');
+          }
+        } catch (e) {
+          console.error('Failed to store auth data:', e);
+        }
+      };
+      
+      // Check if we have auth data from a previous port
+      const restoreAuthFromPortChange = () => {
+        try {
+          const savedAuth = sessionStorage.getItem('auth_port_transfer');
+          if (savedAuth) {
+            const authItems = JSON.parse(savedAuth);
+            Object.keys(authItems).forEach(key => {
+              localStorage.setItem(key, authItems[key]);
+            });
+            console.log('Auth state restored after port change');
+            sessionStorage.removeItem('auth_port_transfer');
+          }
+        } catch (e) {
+          console.error('Failed to restore auth data:', e);
+        }
+      };
+      
+      // Run on page load
+      restoreAuthFromPortChange();
+      
+      // Store auth data when page unloads (like when changing ports)
+      window.addEventListener('beforeunload', storeAuthForPortChange);
+    </script>
   </body>
 </html>

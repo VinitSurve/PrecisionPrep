@@ -1,0 +1,60 @@
+.tab-return-indicator {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.8);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+.dot-pulse {
+  position: relative;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #3F51B5;
+  animation: dotPulse 1.5s infinite linear;
+}
+
+@keyframes dotPulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.6; transform: scale(1); }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.loading {
+  font-size: 18px;
+  color: #3F51B5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading:after {
+  content: "";
+  width: 40px;
+  height: 40px;
+  margin: 10px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3F51B5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

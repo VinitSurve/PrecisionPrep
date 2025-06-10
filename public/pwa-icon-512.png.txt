@@ -1,5 +1,0 @@
-This is a placeholder for the PWA icon (512x512 pixels).
-
-Please replace this file with an actual PNG image named 'pwa-icon-512.png' with dimensions of 512x512 pixels.
-
-The icon should represent the PrecisionPrep Timer Tracker app and use the primary color (#3F51B5) as the main color.

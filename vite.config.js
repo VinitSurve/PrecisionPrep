@@ -5,20 +5,22 @@ import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/', 
   server: {
-    port: 5353,
+    port: 5668, // Change this port to get a fresh start
     host: true,
-    // Fix MIME types and cross-origin issues
     headers: {
       'Access-Control-Allow-Origin': '*',
       'X-Content-Type-Options': 'nosniff',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Service-Worker-Allowed': '/'
     },
-    // Force the server to serve HTML properly
     middlewareMode: false
   },
   build: {
     sourcemap: true,
-    // Ensure proper output paths
     outDir: 'dist',
     assetsDir: 'assets',
     emptyOutDir: true,
@@ -27,7 +29,11 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html')
       },
       output: {
-        manualChunks: undefined,
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          charts: ['chart.js', 'react-chartjs-2', 'recharts'],
+          supabase: ['@supabase/supabase-js']
+        },
       },
     },
   },
@@ -38,11 +44,12 @@ export default defineConfig({
   },
   plugins: [
     react({
-      // Make sure the JSX refresh script works correctly
       jsxRuntime: 'automatic',
-      fastRefresh: true
+      fastRefresh: true,
     }),
     VitePWA({
+      // Completely disable PWA in development
+      injectRegister: 'script',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'robots.txt'],
       manifest: {
@@ -52,8 +59,48 @@ export default defineConfig({
         background_color: '#F5F5F5',
         display: 'standalone',
         icons: [
-          { src: '/pwa-icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/pwa-icon-512.png', sizes: '512x512', type: 'image/png' }
+          { src: 'pwa-icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-icon-512.png', sizes: '512x512', type: 'image/png' }
+        ]
+      },
+      devOptions: {
+        enabled: false,
+        type: 'module',
+      },
+      strategies: 'generateSW',
+      workbox: {
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
+        sourcemap: true,
+        runtimeCaching: [
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+          {
+            urlPattern: /\.(?:js|css)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'assets',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24,
+              },
+            },
+          },
+          {
+            // Never cache auth requests
+            urlPattern: /auth\/v1/,
+            handler: 'NetworkOnly'
+          }
         ]
       }
     })

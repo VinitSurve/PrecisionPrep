@@ -29,3 +29,41 @@ dist-ssr
 .env.development
 .env.production
 .env.test
+
+# PWA assets cache and service worker
+dev-dist/
+sw.js
+workbox-*.js
+workbox-*.js.map
+
+# Build artifacts
+build/
+
+# Debug files
+debug.log
+npm-debug.log
+firebase-debug.log
+*-debug.log
+
+# Local development server
+.firebase/
+.firebaserc
+
+# Dev server
+.vite/
+
+# Temporary files
+.tmp/
+.temp/
+.cache/
+
+# macOS specific
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini

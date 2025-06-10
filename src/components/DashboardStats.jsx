@@ -453,9 +453,13 @@ const DashboardStats = () => {
                   <div className="pie-chart">
                     {pieChartData.correctVsIncorrect && (
                       <Pie 
-                        data={pieChartData.correctVsIncorrect} 
-                        options={pieChartOptions} 
-                        isAnimationActive={false} // Add this line
+                      data={pieChartData.correctVsIncorrect} 
+                       options={{
+                           ...pieChartOptions,
+                              animation: {
+                              duration: 0
+                              }
+                      }}
                       />
                     )}
                   </div>
@@ -467,8 +471,12 @@ const DashboardStats = () => {
                     {pieChartData.timePerformance && (
                       <Pie 
                         data={pieChartData.timePerformance} 
-                        options={pieChartOptions} 
-                        isAnimationActive={false} // Add this line
+                        options={{
+                          ...pieChartOptions,
+                          animation: {
+                            duration: 0,
+                          }
+                        }} 
                       />
                     )}
                   </div>
@@ -480,9 +488,12 @@ const DashboardStats = () => {
                     {pieChartData.speedDistribution && (
                       <Pie 
                         data={pieChartData.speedDistribution} 
-                        options={pieChartOptions} 
-                        isAnimationActive={false} // Add this line
-                      />
+                        options={{
+                          ...pieChartOptions,
+                          animation: {
+                            duration: 0,
+                          }
+                        }} />
                     )}
                   </div>
                 </div>

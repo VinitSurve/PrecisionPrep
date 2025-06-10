@@ -1,144 +1,74 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { supabase } from './supabase/client';
-
-// Components
 import Navbar from './components/Navbar';
-
-// Pages
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
-import Onboarding from './pages/Onboarding'; // Import the new Onboarding component
+import Onboarding from './pages/Onboarding';
 import Settings from './pages/Settings';
 import SubjectTimer from './components/SubjectTimer';
+import { SessionProvider, useSession } from './contexts/SessionContext';
+import './styles/Loader.css'; // Make sure to create this file with the CSS provided
 
-// Helper function since it's referenced but missing
-const checkUserPreferences = async (userId) => {
-  if (!userId) return null;
-  try {
-    const { data, error } = await supabase
-      .from('user_preferences')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
-  } catch (error) {
-    console.error('Error checking preferences:', error);
-    return null;
-  }
-};
-
+// Main App component
 function App() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [hasOnboarded, setHasOnboarded] = useState(true); 
-  const [isRedirecting, setIsRedirecting] = useState(false); // Track page transitions
+  return (
+    <SessionProvider>
+      <AppContent />
+    </SessionProvider>
+  );
+}
 
+// App content using the session context
+function AppContent() {
+  const { session, loading, hasOnboarded, isRefreshing } = useSession();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isReturningFromTab, setIsReturningFromTab] = useState(false);
+  
+  // Keep track if we're coming back from another tab
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      // When returning to visible state, refresh auth state if needed
-      if (document.visibilityState === 'visible' && loading) {
-        // Reset loading state to trigger a re-render
-        setLoading(false);
-        
-        // Re-check auth state when tab becomes visible again
-        const checkAuthState = async () => {
-          try {
-            const { data } = await supabase.auth.getSession();
-            const currentSession = data?.session;
-            setSession(currentSession);
-            
-            // Only check preferences if we have a session
-            if (currentSession?.user) {
-              const preferences = await checkUserPreferences(currentSession.user.id);
-              setHasOnboarded(!!preferences);
-            }
-          } catch (error) {
-            console.error('Error refreshing auth state:', error);
-          } 
-        };
-        
-        checkAuthState();
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        setIsReturningFromTab(true);
+        // Reset after a short delay
+        setTimeout(() => setIsReturningFromTab(false), 1000);
       }
     };
     
-    // Add visibility change listener
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Existing code for handleOnboardingComplete and other listeners
-    const handleOnboardingComplete = (e) => {
-      if (e.key === 'onboarding_completed' && e.newValue === 'true') {
-        setHasOnboarded(true);
-        localStorage.removeItem('onboarding_completed');
-      }
-    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
 
-    window.addEventListener('storage', handleOnboardingComplete);
-
-    // Get initial session - simplified to prevent repeated calls
-    const getInitialSession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        const currentSession = data?.session;
-        setSession(currentSession);
-        
-        // Only check preferences if we have a session
-        if (currentSession?.user) {
-          const preferences = await checkUserPreferences(currentSession.user.id);
-          setHasOnboarded(!!preferences);
-        }
-      } catch (error) {
-        console.error('Error getting initial session:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getInitialSession();
-
-    // Set up auth listener with optimization to prevent unnecessary checks
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        // Only update if the session actually changed
-        if (JSON.stringify(newSession) !== JSON.stringify(session)) {
-          setSession(newSession);
-          
-          // Only check preferences on relevant auth events
-          if (['SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event) && newSession?.user) {
-            const preferences = await checkUserPreferences(newSession.user.id);
-            setHasOnboarded(!!preferences);
-          } else if (event === 'SIGNED_OUT') {
-            setHasOnboarded(true); // Reset to default
-          }
-        }
-      }
-    );
-
-    // Clean up all event listeners
-    return () => {
-      subscription?.unsubscribe();
-      window.removeEventListener('storage', handleOnboardingComplete);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [loading]); // Add loading as a dependency
-
-  // Protected route component with improved navigation handling
+  // Improved Protected Route component 
   const ProtectedRoute = ({ children, requiresOnboarding = true }) => {
-    if (loading) return <div className="loading-container">Loading...</div>;
-    
-    if (!session) return <Navigate to="/login" replace />;
-    
-    if (isRedirecting) {
-      return children; // Let the current route render while redirecting to avoid flickering
+    // Show loading only if not returning from tab switch
+    if (loading && !isReturningFromTab) {
+      return (
+        <div className="loading-container">
+          <div className="loading">Loading...</div>
+        </div>
+      );
     }
     
-    // If we need onboarding and user hasn't onboarded, redirect
+    // If returning from tab, assume session is still valid temporarily
+    if (isReturningFromTab && session) {
+      // Just render children and let session check happen in background
+      return children;
+    }
+    
+    // Redirect to login if no session
+    if (!session) {
+      return <Navigate to="/login" replace />;
+    }
+    
+    // Handle redirection states to prevent UI flicker
+    if (isRedirecting) {
+      return children;
+    }
+    
+    // Handle onboarding redirection if needed
     if (requiresOnboarding && !hasOnboarded) {
       setIsRedirecting(true);
-      // Use setTimeout to ensure smooth transition
       setTimeout(() => setIsRedirecting(false), 100);
       return <Navigate to="/onboarding" replace />;
     }
@@ -188,7 +118,15 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/" element={<Navigate to={session ? (hasOnboarded ? "/dashboard" : "/onboarding") : "/login"} />} />
+            <Route 
+              path="/" 
+              element={
+                <Navigate 
+                  to={session ? (hasOnboarded ? "/dashboard" : "/onboarding") : "/login"} 
+                  replace 
+                />
+              } 
+            />
           </Routes>
         </main>
         
@@ -197,6 +135,13 @@ function App() {
           <footer className="app-footer">
             <p style={{ color: 'white' }}> @{new Date().getFullYear()} PrecisionPrep | A Progressive Web App</p>
           </footer>
+        )}
+        
+        {/* Subtle loading indicator for tab switching */}
+        {(isReturningFromTab || isRefreshing) && (
+          <div className="tab-return-indicator">
+            <span className="dot-pulse"></span>
+          </div>
         )}
       </div>
     </Router>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/client';
+import { useSession } from '../contexts/SessionContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const {refreshSession} = useSession();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,8 +18,12 @@ const Login = () => {
       setLoading(true);
       setError(null);
       
-      // Sign in with email and password
-      const { error } = await supabase.auth.signInWithPassword({
+      // Clear any previous auth data
+      localStorage.removeItem('sb-refresh-token');
+      localStorage.removeItem('sb-access-token');
+      localStorage.removeItem('supabase.auth.token');
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -26,10 +32,14 @@ const Login = () => {
         throw error;
       }
       
-      // Redirect to dashboard on successful login
+      // Force a session refresh to ensure we have the latest data
+      await refreshSession();
+      
+      // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'An error occurred during login');
+    } finally {
       setLoading(false);
     }
   };
