@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/client';
 import { enterFullScreen, isFullScreenAvailable } from '../utils/fullscreen';
+import logo from '../assets/PrecisionPrep.png';
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
@@ -54,7 +55,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <Link to="/"><img src='PrecisionPrep.png' width={70} alt="PrecisionPrep Logo"/></Link>
+        <Link to="/"><img src={logo} width={70} alt="PrecisionPrep Logo"/></Link>
       </div>
       <div className="navbar-links">
         {user ? (
