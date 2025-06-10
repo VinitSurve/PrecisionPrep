@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase/client';
 import { debounce } from '../utils/throttle';
 import { getCurrentUser } from '../supabase/client';
+import logo from '../assets/PrecisionPrep.png';
 
 const Onboarding = () => {
   const [step, setStep] = useState(1);
@@ -386,7 +387,7 @@ const Onboarding = () => {
     <div className="onboarding-container">
       <div className="onboarding-header">
         <div className="logo-container">
-          <img src="/PrecisionPrep.png" alt="PrecisionPrep Logo" className="onboarding-logo" />
+          <img src={logo} alt="PrecisionPrep Logo" className="onboarding-logo" />
         </div>
         <h1>Welcome to PrecisionPrep</h1>
         <p>Let's set up your account in a few quick steps</p>
