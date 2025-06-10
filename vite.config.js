@@ -7,7 +7,7 @@ import { resolve } from 'path'
 export default defineConfig({
   base: '/', 
   server: {
-    port: 5668, // Change this port to get a fresh start
+    port: 5669, // Change this port to get a fresh start
     host: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
